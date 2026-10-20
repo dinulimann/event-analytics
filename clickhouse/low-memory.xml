@@ -1,0 +1,16 @@
+<!-- The demo runs in a 4 GB Docker VM next to other containers. Big GROUP BYs
+     (per-session funnels over millions of sessions) spill to disk instead of
+     failing when several dashboard panels run at once. -->
+<clickhouse>
+    <max_server_memory_usage_to_ram_ratio>0.5</max_server_memory_usage_to_ram_ratio>
+    <mark_cache_size>268435456</mark_cache_size>
+    <logger><level>warning</level></logger>
+    <profiles>
+        <default>
+            <max_memory_usage>700000000</max_memory_usage>
+            <max_bytes_before_external_group_by>250000000</max_bytes_before_external_group_by>
+            <max_bytes_before_external_sort>250000000</max_bytes_before_external_sort>
+            <max_threads>2</max_threads>
+        </default>
+    </profiles>
+</clickhouse>

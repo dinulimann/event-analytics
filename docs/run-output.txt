@@ -1,0 +1,25 @@
+$ python scripts/generate.py
+done: 20,300,461 events, 4,303,530 sessions, 2,300,000 users in 59s
+
+$ python scripts/verify.py
+ok  events: add_to_cart                                  query    953,058.0000   truth    953,058.0000
+ok  events: checkout_start                               query    523,483.0000   truth    523,483.0000
+ok  events: page_view                                    query  9,466,572.0000   truth  9,466,572.0000
+ok  events: product_view                                 query  9,041,676.0000   truth  9,041,676.0000
+ok  events: purchase                                     query    315,672.0000   truth    315,672.0000
+ok  events: total                                        query 20,300,461.0000   truth 20,300,461.0000
+ok  unique users                                         query  2,300,000.0000   truth  2,300,000.0000
+ok  revenue                                              query 88,618,441,000.0000   truth 88,618,441,000.0000
+ok  funnel: sessions that purchased                      query    315,672.0000   truth    315,672.0000
+ok  funnel: sessions that started checkout               query    523,483.0000   truth    523,483.0000
+ok  checkout->purchase rate, control                     query          0.5748   truth          0.5748
+ok  checkout->purchase rate, new_checkout                query          0.6312   truth          0.6312
+ok  mobile checkout->purchase rate, app 5.2.0 (incident) query          0.1513   truth          0.1513
+
+13/13 checks match the ground truth
+
+$ python scripts/loadtest.py --events 200000 --concurrency 32
+sent 209,800 events in 1,049 requests (49 retried batches) in 14.8s: 14,167 events/s; request latency p50 468 ms, p95 551 ms, p99 582 ms
+valid events sent: 196,046 unique; stored rows 198,980 (before merge), unique ids 196,046, rows with FINAL 196,046
+invalid events sent: 4,164 (including copies in retried batches); in events_rejected: 4,164
+RESULT: every valid event stored exactly once, every invalid one rejected

@@ -1,0 +1,36 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13", cache: pip}
+      - run: pip install -r requirements.txt
+      - run: pytest -v
+
+  end-to-end:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13", cache: pip}
+      - run: pip install -r requirements.txt
+      - name: Start ClickHouse, the collector and Grafana
+        run: docker compose up -d --build --wait
+      - name: Generate a smaller dataset and check every query against the ground truth
+        run: |
+          python scripts/generate.py --users 100000 --chunk-users 50000
+          python scripts/verify.py
+      - name: Load test the collector with retries and bad events
+        run: python scripts/loadtest.py --events 30000 --concurrency 16
+      - name: The analytics are unchanged after the load test cleaned up
+        run: python scripts/verify.py
+      - name: Grafana can query ClickHouse
+        run: |
+          curl -sf -u admin:admin localhost:3002/api/datasources/uid/clickhouse/health
+          curl -sf -u admin:admin localhost:3002/api/dashboards/uid/shop-events > /dev/null
+      - if: failure()
+        run: docker compose logs --tail 100
